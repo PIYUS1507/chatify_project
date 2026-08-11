@@ -3,12 +3,17 @@ import dotenv from "dotenv"
 import express from "express"
 import authRoute from "./routes/auth.routes.js"
 import messageRoute from "./routes/message.routes.js"
+
 import { connextionDB } from "./lib/db.js"
+
+import path from "path"
 
 
 dotenv.config()
 const app = express()
 app.use(express.json())
+
+const __dirname = path.resolve()
 
 app.use("/api/auth",authRoute)
 app.use("/api/message",messageRoute)
@@ -25,3 +30,4 @@ const start = async () => {
 }
 
 start()
+
