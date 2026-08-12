@@ -2,6 +2,8 @@ import { User } from '../models/user.model.js'
 import bcrypt from "bcryptjs"
 import { generateToken } from '../lib/utils.js'
 import { sendWelcomeEmail } from "../emails/emailHandlers.js"
+
+
 export const signup = async (req, res) => {
     const { fullName, email, password } = req.body
 
@@ -43,10 +45,10 @@ export const signup = async (req, res) => {
 
             return res.status(201)
                 .json({
-                    _id: savedUser._id,
-                    fullName: savedUser.fullName,
-                    email: savedUser.email,
-                    profilePic: savedUser.profilePic
+                    _id: newUser._id,
+                    fullName: newUser.fullName,
+                    email: newUser.email,
+                    profilePic: newUser.profilePic
                 })
         }
         else {
@@ -59,4 +61,39 @@ export const signup = async (req, res) => {
         return res.status(500).json({ message: "the internal server error while signing up" })
     }
 
+}
+
+export const login = async (req, res) => {
+    const { email, password } = req.body
+    if (!email || !password) {
+        return res.status(400).json({ message: "all fields are required" })
+    }
+    try {
+        const user = await User.findOne({ email })
+        if (!user) {
+            return res.status(400).json({ message: "invalid credential" })
+        }
+        const isPassword = await bcrypt.compare(password, user.password)
+        if (!isPassword) {
+            return res.status(400).json({ message: "Invalid Credentials" })
+        }
+
+        generateToken(user._id,res)
+        return res.status(201)
+            .json({
+                _id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                profilePic: user.profilePic
+            })
+
+    } catch (error) {
+        console.log("Error occured while login: ", error)
+        return res.status(500).json({ message: "Error while Logging up" })
+    }
+}
+
+export const logout = async (req, res) => {
+    res.cookie("jwt", "", { maxAge: 0 });
+    return res.status(200).json({ message: "The user Logged Out successfully" })
 }
