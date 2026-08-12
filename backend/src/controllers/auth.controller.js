@@ -34,13 +34,11 @@ export const signup = async (req, res) => {
         if (newUser) {
             const savedUser = await newUser.save()
             generateToken(savedUser._id, res)
-
             try {
-                await sendWelcomeEmail(savedUser.email, savedUser.fullName, process.env.CLIENT_URL)
+                await sendWelcomeEmail(savedUser.email,savedUser.fullName,process.env.CLIENT_URL)
             } catch (error) {
                 console.log("error while sending the email", error)
             }
-
             return res.status(201)
                 .json({
                     _id: savedUser._id,
