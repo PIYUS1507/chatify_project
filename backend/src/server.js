@@ -3,7 +3,7 @@ import dotenv from "dotenv"
 import express from "express"
 import authRoute from "./routes/auth.routes.js"
 import messageRoute from "./routes/message.routes.js"
-
+import cookieParser from "cookie-parser"
 import { connextionDB } from "./lib/db.js"
 
 import path from "path"
@@ -12,6 +12,7 @@ import path from "path"
 dotenv.config()
 const app = express()
 app.use(express.json())
+app.use(cookieParser())
 
 const __dirname = path.resolve()
 

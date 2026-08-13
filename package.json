@@ -17,5 +17,8 @@
     "url": "https://github.com/PIYUS1507/chatify_project/issues"
   },
   "homepage": "https://github.com/PIYUS1507/chatify_project#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "multer": "^2.2.0"
+  }
 }
