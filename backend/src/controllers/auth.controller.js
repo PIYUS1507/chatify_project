@@ -2,6 +2,7 @@ import { User } from '../models/user.model.js'
 import bcrypt from "bcryptjs"
 import { generateToken } from '../lib/utils.js'
 import { sendWelcomeEmail } from "../emails/emailHandlers.js"
+import { uploadImageonCloude } from '../lib/cloudinary.js'
 
 
 export const signup = async (req, res) => {
@@ -78,7 +79,7 @@ export const login = async (req, res) => {
             return res.status(400).json({ message: "Invalid Credentials" })
         }
 
-        generateToken(user._id,res)
+        generateToken(user._id, res)
         return res.status(201)
             .json({
                 _id: user._id,
@@ -96,4 +97,43 @@ export const login = async (req, res) => {
 export const logout = async (req, res) => {
     res.cookie("jwt", "", { maxAge: 0 });
     return res.status(200).json({ message: "The user Logged Out successfully" })
+}
+
+export const updateProfile = async (req, res) => {
+    try {
+        const profilePic = req.file?.path
+
+        if (!profilePic) {
+            return res.status(400).json({ message: "profile pic is not given" })
+        }
+
+        const uploadResponse = await uploadImageonCloude(profilePic)
+
+        if (!uploadResponse) {
+            return res.status(500).json({ message: "Error while uploading the image" })
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user._id,
+            { profilePic: uploadResponse },
+            { new: true }
+        )
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        return res.status(200).json({
+            message: "The profile photo is updated",
+            user: {
+                _id: updatedUser._id,
+                fullName: updatedUser.fullName,
+                email: updatedUser.email,
+                profilePic: updatedUser.profilePic
+            }
+        })
+    } catch (error) {
+        console.log("Error occurres while updating the profile ", error)
+        return res.status(500).json({ message: "Error occurres while updating the profile" })
+    }
 }
